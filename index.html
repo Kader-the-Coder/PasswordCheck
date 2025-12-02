@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Secure Password Maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --neutral-bg: #f2f2f2;
+            --neutral-text: #333;
+            --blue-bg: #0d47a1;
+            --blue-text: #f5f9ff;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.neutral {
+            background-color: var(--neutral-bg);
+            color: var(--neutral-text);
+        }
+
+        body.blue-theme {
+            background-color: var(--blue-bg);
+            color: var(--blue-text);
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 24px 20px 28px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                margin: 60px auto;
+                padding: 28px 30px 32px;
+            }
+        }
+
+        body.blue-theme .container {
+            background: rgba(13, 71, 161, 0.95);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        h1, h2, p {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Large, phone-friendly input */
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 12px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            box-sizing: border-box;
+        }
+
+        body.blue-theme input[type="password"],
+        body.blue-theme input[type="text"] {
+            border-color: #bbdefb;
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .show-password-container {
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .show-password-container input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 6px;
+        }
+
+        button {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #888;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        body.blue-theme button {
+            background-color: #1565c0;
+        }
+
+        body.blue-theme button:hover {
+            background-color: #0b59b2;
+        }
+
+        #message {
+            margin-top: 18px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .success {
+            color: #0d47a1;
+        }
+
+        .error {
+            color: #b71c1c;
+        }
+
+        body.blue-theme .success {
+            color: #ffeb3b;
+        }
+
+        body.blue-theme .error {
+            color: #ffcdd2;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="neutral">
+<div class="container">
+    <h1 id="mainTitle">Secure Password Maker</h1>
+    <p id="description">
+        This tool checks whether your password meets a series of custom security rules.
+        Feedback will appear one step at a time to help you refine it.
+    </p>
+
+    <label for="password">Enter your password:</label>
+    <input type="password" id="password" autocomplete="off" />
+
+    <div class="show-password-container">
+        <input type="checkbox" id="toggleVisibility" />
+        <label for="toggleVisibility" style="display:inline; font-weight:normal;">
+            Show password
+        </label>
+    </div>
+
+    <button id="submitBtn">Check password</button>
+
+    <div id="message"></div>
+
+    <div id="congrats" class="hidden">
+        <h2>Congratulations!</h2>
+        <p>
+            The secret is out: <strong>It’s a boy!</strong><br>
+            Wishing the parents a lifetime of love, laughter, and blue balloons.
+        </p>
+    </div>
+</div>
+
+<script>
+(function () {
+    const CORRECT_PASSWORD = "ItsABoy";
+
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const messageEl = document.getElementById("message");
+    const congratsEl = document.getElementById("congrats");
+    const toggleVisibility = document.getElementById("toggleVisibility");
+    const mainTitle = document.getElementById("mainTitle");
+    const description = document.getElementById("description");
+
+    function setErrorMessage(hint) {
+        messageEl.innerHTML =
+            '<span style="color:#b71c1c;">This password is not secure.</span> ' + hint;
+        messageEl.className = "error";
+        congratsEl.classList.add("hidden");
+
+        // Reset theme & text back to "Secure Password Maker"
+        document.body.classList.remove("blue-theme");
+        document.body.classList.add("neutral");
+        document.title = "Secure Password Maker";
+        mainTitle.textContent = "Secure Password Maker";
+        description.textContent =
+            "This tool checks whether your password meets a series of custom security rules. " +
+            "Feedback will appear one step at a time to help you refine it.";
+    }
+
+    function setSuccess() {
+        document.body.classList.remove("neutral");
+        document.body.classList.add("blue-theme");
+
+        document.title = "Gender Reveal";
+        mainTitle.textContent = "Gender Reveal";
+        description.textContent =
+            "You’ve unlocked the surprise! Enjoy the reveal below.";
+
+        messageEl.textContent = "You’ve created a valid password!";
+        messageEl.className = "success";
+
+        congratsEl.classList.remove("hidden");
+    }
+
+    function checkPassword() {
+        const value = passwordInput.value;
+
+        // If it's exactly correct
+        if (value === CORRECT_PASSWORD) {
+            setSuccess();
+            return;
+        }
+
+        const upper = value.toUpperCase();
+        const lower = value.toLowerCase();
+
+        // 1. Length must be exactly 7
+        if (value.length !== 7) {
+            setErrorMessage("It should be exactly 7 characters long.");
+            return;
+        }
+
+        // 2. No spaces
+        if (/\s/.test(value)) {
+            setErrorMessage("It should not contain any spaces.");
+            return;
+        }
+
+        // 3. No numbers
+        if (/[0-9]/.test(value)) {
+            setErrorMessage("It should not contain any numbers.");
+            return;
+        }
+
+        // 4. Letters only (no symbols)
+        if (!/^[A-Za-z]+$/.test(value)) {
+            setErrorMessage("It should contain letters only (no symbols or punctuation).");
+            return;
+        }
+
+        // 5. Exactly 3 uppercase letters
+        const uppercaseMatches = value.match(/[A-Z]/g) || [];
+        if (uppercaseMatches.length !== 3) {
+            setErrorMessage("It should contain exactly 3 uppercase letters.");
+            return;
+        }
+
+        // 6. All characters must be unique (case-insensitive)
+        const seen = new Set();
+        for (const ch of lower) {
+            if (seen.has(ch)) {
+                setErrorMessage("All characters should be different — no repeated letters.");
+                return;
+            }
+            seen.add(ch);
+        }
+
+        // 7. Middle (4th) character is the first vowel in the alphabet
+        const middleChar = value.charAt(3).toLowerCase();
+        if (middleChar !== "a") {
+            setErrorMessage("The 4th character (the middle one) should be the first vowel in the alphabet.");
+            return;
+        }
+
+        // 8. First character is the only single-letter word always capitalized in English
+        const firstChar = value.charAt(0);
+        if (firstChar !== "I") {
+            setErrorMessage(
+                "The first character should be the single-letter English word that is always written with a capital letter."
+            );
+            return;
+        }
+
+        // 9. Last character is the second-to-last letter of the alphabet
+        const lastChar = value.charAt(6).toLowerCase();
+        if (lastChar !== "y") {
+            setErrorMessage(
+                "The last character should be the second-to-last letter of the English alphabet."
+            );
+            return;
+        }
+
+        // 10. Must contain the blood type AB as consecutive letters in all caps
+        if (!value.includes("AB")) {
+            setErrorMessage(
+                "For extra complexity, it should contain the two-letter blood type written in all capitals using the first two letters of the alphabet."
+            );
+            return;
+        }
+
+        // 11. Must contain the country code for South Africa (case-insensitive)
+        if (!upper.includes("SA")) {
+            setErrorMessage(
+                "It should also contain the two-letter country code for the nation at the southern tip of Africa."
+            );
+            return;
+        }
+
+        // 12. Second character is alphabetically one step after the third
+        const secondChar = value.charAt(1).toLowerCase();
+        const thirdChar = value.charAt(2).toLowerCase();
+        if (secondChar.charCodeAt(0) !== thirdChar.charCodeAt(0) + 1) {
+            setErrorMessage(
+                "The second character must be exactly one step after the third character in the alphabet (for example, if the third character were C, the second character would need to be D)."
+            );
+            return;
+        }
+
+        // Fallback (ideally never reached)
+        setErrorMessage("The password is almost secure — read the password to ensure it makes sense, and check each requirement again carefully.");
+    }
+
+    // Toggle password visibility
+    toggleVisibility.addEventListener("change", function () {
+        passwordInput.type = this.checked ? "text" : "password";
+    });
+
+    submitBtn.addEventListener("click", checkPassword);
+
+    passwordInput.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            checkPassword();
+        }
+    });
+})();
+</script>
+</body>
+</html>

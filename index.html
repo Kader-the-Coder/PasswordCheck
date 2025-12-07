@@ -289,15 +289,6 @@
             return;
         }
 
-        // 9. Last character is the second-to-last letter of the alphabet
-        const lastChar = value.charAt(6).toLowerCase();
-        if (lastChar !== "y") {
-            setErrorMessage(
-                "The last character should be the second-to-last letter of the English alphabet."
-            );
-            return;
-        }
-
         // 10. Must contain the blood type AB as consecutive letters in all caps
         if (!value.includes("AB")) {
             setErrorMessage(
@@ -320,6 +311,15 @@
         if (secondChar.charCodeAt(0) !== thirdChar.charCodeAt(0) + 1) {
             setErrorMessage(
                 "The second character must be exactly one step after the third character in the alphabet (for example, if the third character were C, the second character would need to be D)."
+            );
+            return;
+        }
+
+        // 9. Last character is the second-to-last letter of the alphabet
+        const lastChar = value.charAt(6).toLowerCase();
+        if (lastChar !== "y") {
+            setErrorMessage(
+                "The last character should be the second-to-last letter of the English alphabet."
             );
             return;
         }
